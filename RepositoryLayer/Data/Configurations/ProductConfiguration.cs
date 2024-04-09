@@ -15,7 +15,7 @@ namespace RepositoryLayer.Data.Configurations
         {
             builder.HasOne(p => p.ProductBrand)
                 .WithMany()
-                .HasForeignKey(p=>p.ProductBrandId);
+                .HasForeignKey(p => p.ProductBrandId);
 
             builder.HasOne(p => p.ProductType)
                 .WithMany()
@@ -25,7 +25,8 @@ namespace RepositoryLayer.Data.Configurations
                 .IsRequired()
                 .HasMaxLength(100);
             builder.Property(p => p.Description).IsRequired();
-            builder.Property(p=>p.PictureUrl).IsRequired();
+            builder.Property(p => p.PictureUrl).IsRequired();
+            builder.Property(p => p.Price).HasColumnType("decimal(18,2)");
 
         }
     }

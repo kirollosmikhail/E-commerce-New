@@ -5,24 +5,52 @@ namespace E_commerce.APis
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            
+
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            
+
             builder.Services.AddDbContext<StoreContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+
+
             var app = builder.Build();
+
+            #region Update-Database
+            //StoreContext dbcontext = new StoreContext();
+            //await dbcontext.Database.MigrateAsync();
+
+            using var Scope = app.Services.CreateScope();
+            // Group Of Services LifeTime Scooped
+            var Services = Scope.ServiceProvider;
+            // Services It Self
+            var LoggerFactory = Services.GetRequiredService<ILoggerFactory>();
+            try
+            {
+               
+                var DbContext = Services.GetRequiredService<StoreContext>();
+                // Ask CLR For Creating Object From DbContext Explicitly
+                await DbContext.Database.MigrateAsync(); // Update-Database
+            }
+            catch (Exception ex)
+            {
+                var Logger = LoggerFactory.CreateLogger<Program>();
+                Logger.LogError(ex, "An Error Occured During Appling The Migration");
+                
+            }
+
+
+            #endregion
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
