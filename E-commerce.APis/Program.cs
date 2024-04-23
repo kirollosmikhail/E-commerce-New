@@ -1,4 +1,7 @@
+using CoreLayer.Entites;
+using CoreLayer.Repositories;
 using Microsoft.EntityFrameworkCore;
+using RepositoryLayer;
 using RepositoryLayer.Data;
 
 namespace E_commerce.APis
@@ -22,7 +25,9 @@ namespace E_commerce.APis
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
             });
 
+            //builder.Services.AddScoped<IGenericRepository<Product>, GenericRepository<Product>>();
 
+            builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
             var app = builder.Build();
 
@@ -37,20 +42,22 @@ namespace E_commerce.APis
             var LoggerFactory = Services.GetRequiredService<ILoggerFactory>();
             try
             {
-               
+
                 var DbContext = Services.GetRequiredService<StoreContext>();
                 // Ask CLR For Creating Object From DbContext Explicitly
                 await DbContext.Database.MigrateAsync(); // Update-Database
+                await StoreContextSeed.SeedAsync(DbContext); // data seeding
             }
             catch (Exception ex)
             {
                 var Logger = LoggerFactory.CreateLogger<Program>();
                 Logger.LogError(ex, "An Error Occured During Appling The Migration");
-                
             }
 
 
             #endregion
+
+
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
